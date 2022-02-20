@@ -18,7 +18,8 @@ clearvars;
 load('results/100k-results-MatrixCompletionL1Reg.mat');
 
 %% Open a figure
-hfig = figure('Position',[100,100,1000,225]);
+% hfig = figure('Position',[100,100,1000,225]);
+hfig = figure('Position',[100,100,900,203]);
 % hfig = figure('Position',[100,100,1000,300]);
 
 set(hfig,'name','MatrixCompletion-MovieLens100k-l1','NumberTitle','off');
@@ -83,7 +84,8 @@ end
 % sgtitle({'\textbf{matrix completion} -- $\ell_1$-regularization', '\texttt{MovieLens-100k}'}, 'Interpreter', 'latex');
 % sgtitle({'$\ell_1$-regularization'}, 'Interpreter', 'latex');
 
-sgtitle({'\textbf{matrix completion}', '\texttt{MovieLens-100k}', '$\ell_1$-regularization'}, 'Interpreter', 'latex');
+sg = sgtitle({'\textbf{matrix completion}', '\texttt{MovieLens-100k}', '$\ell_1$-regularization'}, 'Interpreter', 'latex');
+sg.FontSize = 15.5;
 
 %% Save Figures
 % This saves pdf's perfectly cropped etc!
