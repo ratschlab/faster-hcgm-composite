@@ -1,15 +1,3 @@
-%% Description
-% This script generates the plots for Figure 4 in [Ref].
-% You need to run the test file TESTMOVIELENS100k first, before this 
-% script.
-%
-% [Ref] Locatello, F., Yurtsever, A., Fercoq, O., Cevher, V.
-% "Stochastic Conditional Gradient Method for Composite Convex Minimization"
-% Advances in Neural Information Processing Systems 32 (NeurIPS 2019).
-%
-% contact: Alp Yurtsever - alp.yurtsever@epfl.ch
-% Modified from the code for [LY+19] 
-
 %% Close open figures and clear the workspace
 close all;
 clearvars;
