@@ -18,8 +18,10 @@ clearvars;
 load('results/100k-results-MatrixCompletionL1Reg.mat');
 
 %% Open a figure
-hfig = figure('Position',[100,100,850,280]);
-set(hfig,'name','MatrixCompletion-MovieLens100k','NumberTitle','off');
+hfig = figure('Position',[100,100,1000,225]);
+% hfig = figure('Position',[100,100,1000,300]);
+
+set(hfig,'name','MatrixCompletion-MovieLens100k-l1','NumberTitle','off');
 
 % matplotlib_colors = {'#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', ...
 %     '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'};
@@ -28,13 +30,15 @@ blue = [0, 0.4470, 0.7410];
 purple = 	[0.4940, 0.1840, 0.5560];
 matplotlib_colors = {purple, blue};
 
+linewidth = 2;
+
 %% Subfigure 1
-subplot(131)
+subplot(121)
 
 hold on;
-plot(infoSHCGM.rmse_train, 'Color', matplotlib_colors{1}, 'LineWidth',1);
+plot(infoSHCGM.rmse_train(1:30000), 'Color', matplotlib_colors{1}, 'LineWidth',linewidth);
 % plot(trainRmseWithoutBoxMean, 'Color',matplotlib_colors{2},'LineWidth',1);
-plot(infoHSAGCGM.rmse_train, 'LineWidth', 1, 'Color', matplotlib_colors{2});
+plot(infoHSAGCGM.rmse_train(1:30000), 'LineWidth', linewidth, 'Color', matplotlib_colors{2});
 
 xlabel('iteration','Interpreter','latex');
 ylabel('Train RMSE','Interpreter','latex');
@@ -45,49 +49,29 @@ ax = gca;
 % ax.YTick = -10:0.5:10;
 
 %% Subfigure 2
-subplot(132)
+subplot(122)
 
-plot(infoSHCGM.rmse_test, 'Color',matplotlib_colors{1},'LineWidth',1);
+hl1 = plot(infoSHCGM.rmse_test(1:30000), 'Color',matplotlib_colors{1},'LineWidth',linewidth);
 hold on;
-loglog(infoHSAGCGM.rmse_test,'LineWidth',1,'Color', matplotlib_colors{2});
+hl3 = loglog(infoHSAGCGM.rmse_test(1:30000),'LineWidth',linewidth,'Color', matplotlib_colors{2});
 xlabel('iteration','Interpreter','latex');
 ylabel('Test RMSE','Interpreter','latex');
 
-% ylim([1,3.5]);
 ax = gca;
-% ax.XTick = 0:2500:10000;
-% ax.YTick = -10:0.5:10;
-
-%% Subfigure 3
-subplot(133)
-hold on;
-
-hl1 = plot(infoSHCGM.ell1_norm,'Color',matplotlib_colors{1},'LineWidth',2);
-hl3 = plot(infoHSAGCGM.ell1_norm, 'LineWidth', 2, 'Color', matplotlib_colors{2});
-
-xlabel('iteration','Interpreter','latex');
-% ylabel('$\|X - \textrm{proj}_{[1,5]}(X) \|_F$','Interpreter','latex');
-ylabel('$\ell_1$-norm', 'Interpreter', 'latex');
-
-ax = gca;
-% ax.XTick = 10.^(-100:100);
-% ax.YTick = 10.^(-100:100);
-ax.XScale = 'log';
-ax.YScale = 'log';
-% ylim([1,1e4]);
-% xlim([1,1e4]);
+ax.YLim = [0,6];
 
 %% Legend
 % hl = legend([hl3,hl2,hl1], 'Separable','SFW','SHCGM');
 %hl = legend([hl1,hl2,hl3], 'SHCGM','SFW','Separable (us)');
 hl = legend([hl1,hl3], 'SHCGM','H-SAG-CGM/v1', 'Interpreter', 'latex');
-hl.Location = 'SouthWest';
+% hl.Location = 'SouthWest';
+hl.Location = 'NorthEast';
 hl.FontSize = 13;
 hl.Interpreter = 'latex';
 
 %% General properties
-for t = 1:3
-    subplot(1,3,t)
+for t = 1:2
+    subplot(1,2,t)
     set(gca,'TickLabelInterpreter','latex',...
         'FontSize',13,...
         'TickDir','out',...
@@ -96,11 +80,11 @@ for t = 1:3
     box on
 end
 
-sgtitle({'\textbf{matrix completion}', '\texttt{MovieLens-100k}'}, 'Interpreter', 'latex');
+% sgtitle({'\textbf{matrix completion} -- $\ell_1$-regularization', '\texttt{MovieLens-100k}'}, 'Interpreter', 'latex');
+% sgtitle({'$\ell_1$-regularization'}, 'Interpreter', 'latex');
 
+sgtitle({'\textbf{matrix completion}', '\texttt{MovieLens-100k}', '$\ell_1$-regularization'}, 'Interpreter', 'latex');
 
-%% Last edit: 24 October 2019 - Alp Yurtsever
-return;
 %% Save Figures
 % This saves pdf's perfectly cropped etc!
 set(gca,'Layer','top')
@@ -124,11 +108,4 @@ for rr = 1:length(figHandles)
 %         export_fig(sName,'-pdf', '-dCompatibilityLevel=1.4');
 %     end
     print(gcf, '-dpng', sName, '-r300');
-end
-
-function [amean,astd,alow,aup] = process_records(records)
-    amean = mean(records,2);
-    astd = std(records,0,2);
-    alow = amean - astd;
-    aup = amean + astd;
 end
