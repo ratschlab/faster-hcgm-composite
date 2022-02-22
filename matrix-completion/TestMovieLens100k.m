@@ -1,28 +1,22 @@
 %% Description
-% This script implements the matrix completion experiment with L1
-% regularization. We use MovieLens 100k dataset, make sure that you 
-% % download the dataset by running DOWNLOADDATA before this test. 
-% This script will save the results under the results folder. 
-% Run PLOTFIG4 to generate the plots. 
-% 
-% [Ref] Dresdner, G. ,.......... WRITE ME .......
+% This script implements the matrix completion experiment with MovieLens
+% 100k dataset. Make sure that you download the dataset by running
+% DOWNLOADDATA before this test. This script will save the results under
+% the results folder. Run PLOTFIG5 to generate the plots in Figure 4 from
+% [Ref].
 %
-% [LY+19] Locatello, F., Yurtsever, A., Fercoq, O., Cevher, V.
+% [Ref] Locatello, F., Yurtsever, A., Fercoq, O., Cevher, V.
 % "Stochastic Conditional Gradient Method for Composite Convex Minimization"
 % Advances in Neural Information Processing Systems 32 (NeurIPS 2019).
 %
-% Modified from the code for [LY+19] 
-% contact: Gideon Dresdner
+% contact: Alp Yurtsever - alp.yurtsever@epfl.ch
 
 %% Fix the seed for reproducability
 rng(0,'twister');
 
 %% load data
-% Atrain = dlmread('data/ml-100k/ub.base');
-% Atest = dlmread('data/ml-100k/ub.test');
-
-Atrain = dlmread('/Users/gideon/projects/SHCGM/MatrixCompletion/data/ml-100k/ub.base');
-Atest = dlmread('/Users/gideon/projects/SHCGM/MatrixCompletion/data/ml-100k/ub.test');
+Atrain = dlmread('data/ml-100k/ub.base');
+Atest = dlmread('data/ml-100k/ub.test');
 
 UserID = Atrain(:,1);
 MovID = Atrain(:,2);
@@ -53,44 +47,53 @@ nU = max(UserID);       % # Users
 nM = max(MovID);        % # Movies
 clearvars A rDel cDel
 
-% Parameters
 numberSample = 1000; % amount of ratings to be used at each iteration
+
 beta1 = 7000; % problem parameter for domain diamater
-beta0 = 1; % algorithm parameter for smoothing
-lambda = 0.1; % regularization parameter
+beta0 = 10; % algorithm parameter for smoothing
 
 x0 = zeros(nM,nU); % initial point for algorithms
 
 % Generate oracles to be used in the algorithms
-[ objective, rmse_train, rmse_test, incrgradf, stogradf, gradf, proxg, lmoX, projX ] = ...
-    Oracles_l1norm( numberSample,MovID,UserID,Rating,MovID_test,UserID_test,Rating_test,beta1,lambda );
+[ rmse_train, rmse_test, gradf, proxg, lmoX, projX ] = ...
+    Oracles( numberSample,MovID,UserID,Rating,MovID_test,UserID_test,Rating_test,beta1 );
 
 % Error measures to be used
 errFncs = {};
-errFncs{end+1} = 'objective';
-errFncs{end+1} = objective;
-errFncs{end+1} = 'rmse_train';
-errFncs{end+1} = rmse_train;
+errFncs{end+1} = 'rmse_train'; 
+errFncs{end+1} = rmse_train; 
 errFncs{end+1} = 'rmse_test';
-errFncs{end+1} = rmse_test;
-errFncs{end+1} = 'ell1_norm';
-errFncs{end+1} = @(x) sum(abs(x), 'all');
+errFncs{end+1} = rmse_test; 
+errFncs{end+1} = 'feasGap'; 
+errFncs{end+1} = @(x) norm(x - proxg(x),'fro'); 
 
-num_iter = 1e5;
+infoWithBox = {};
+infoWithoutBox = {};
+separableInfo = {};
 
-%% Run Separable SHCGM
-fprintf('Separable SHCGM-Test\n');
-[ ~, infoHSAGCGM ] = SeparableSHCGM( incrgradf, lmoX, proxg, beta0, x0, ...
-    'maxitr', num_iter, 'errfncs', errFncs, 'printfrequency', 100 );
+% for TestNo = 1:10
+for TestNo = 1:3
+    
+    fprintf('Test number %d \n', TestNo);    
+    
+    %% Run Separable SHCGM
+    fprintf('Separable SHCGM-Test%d \n', TestNo);
+    [ ~, separableInfo{end+1} ] = SeparableSHCGM( gradf, lmoX, proxg, beta0/10000, x0, ...
+        'maxitr', 1e4, 'errfncs', errFncs, 'printfrequency', 100 );
+    
+    %% Run SHCGM
+%     fprintf('SHCGM-Test%d \n', TestNo);
+%     [ ~, infoWithBox{end+1} ] = SHCGM( gradf, lmoX, proxg, beta0, x0, ...
+%         'maxitr', 1e4, 'errfncs', errFncs, 'printfrequency', 100 );
+%     
+%     %% Run SHCGM
+%     fprintf('SFW1-Test%d \n', TestNo);
+%     [ ~, infoWithoutBox{end+1} ] = SFW1( gradf, lmoX, x0, ...
+%         'maxitr', 1e4, 'errfncs', errFncs, 'printfrequency', 100 );
+    
+end
 
-%% Run SHCGM
-fprintf('SHCGM-Test\n');
-[ ~, infoSHCGM ] = SHCGM( stogradf, lmoX, proxg, beta0, x0, ...
-    'maxitr', num_iter, 'errfncs', errFncs, 'printfrequency', 100 );
-
-%% Run Three Operator Splitting for Ground Truth
-% increase # iterations if 100 is not enough
-[~, infoTOS] = TOS(gradf,proxg,projX,x0,'maxitr', 100, 'errfncs', errFncs, 'printfrequency', 10);
+save("results/100k-separable-results.mat", 'separableInfo');
 
 %% Log the test setup
 infoTest.beta0 = beta0;
@@ -98,9 +101,9 @@ infoTest.beta1 = beta1;
 infoTest.numSample = numberSample;
 
 %% Save results
-if ~exist('results','dir'), mkdir results; end
-save('results/100k-results-MatrixCompletionL1Reg.mat',...
-    'infoHSAGCGM','infoSHCGM','infoTOS','infoTest',...
-    '-v7.3');
+% if ~exist('results','dir'), mkdir results; end
+% save('results/100k-results.mat',...
+%     'separableInfo','infoWithBox','infoWithoutBox','infoTest',...
+%     '-v7.3');
 
-%% Last edit: 18 February 2022 - Alp Yurtsever
+%% Last edit: 24 October 2019 - Alp Yurtsever

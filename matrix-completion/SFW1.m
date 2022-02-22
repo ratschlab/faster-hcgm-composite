@@ -1,7 +1,11 @@
-function [ xk, info ] = SHCGM( gradf, lmoX, proxg, beta0, xk, varargin)
-%SHCGM This function implements our Stochastic Homotopy Conditional
-%Gradient Method from [Ref] for the matrix completion and covariance
-%matrix estimation problems.
+function [ xk, info ] = SFW1( gradf, lmoX, xk, varargin)
+%SFW1 This function implements Stochastic Frank Wolfe Method from [Ref3] 
+%for matrix completion problem.
+%
+% [Ref3] Mokhtari, A., Hassani, H., Karbasi, A.
+% "Stochastic Conditional gradient methods: From convex minimization to
+% submodular maximization"
+% arXiv:1804.09554v2, 2018
 %
 % [Ref] Locatello, F., Yurtsever, A., Fercoq, O., Cevher, V.
 % "Stochastic Conditional Gradient Method for Composite Convex Minimization"
@@ -13,9 +17,8 @@ function [ xk, info ] = SHCGM( gradf, lmoX, proxg, beta0, xk, varargin)
 
 % Default choices
 errFncs = {};
-maxitr = 1000;
+maxitr = 1000;   % total iterations
 printfrequency = 0;
-stoptime = inf;
 
 if (rem(length(varargin),2)==1)
     error('Options should be given in pairs');
@@ -26,8 +29,6 @@ else
                 errFncs = varargin{itr+1};
             case 'maxitr'
                 maxitr = varargin{itr+1};
-            case 'stoptime'
-                stoptime = varargin{itr+1};
             case 'printfrequency'
                 printfrequency = varargin{itr+1};
             otherwise
@@ -52,29 +53,10 @@ for itr = 1:maxitr
     
     % Main algorithm
     eta = 9/(itr+8);
-    beta = beta0/sqrt(itr+8);
     rho = 4/(itr+7)^(2/3);
     
-    stochastic_grad = gradf(xk);
-    
-    % initialize dk since we don't know the size of the gradients in
-    % advance.
-    if all(size(dk) == [1,1])
-        dk = sparse(size(stochastic_grad,1),size(stochastic_grad,2));
-    end
-    
-    % to overwrite the values, first set them to zero and then add in the
-    % gradients which are padded with zeros wherever there is no
-    % observation anyway.
-    [r,c,v] = find(stochastic_grad);    
-    dk([r,c]) = 0;
-    dk = dk + stochastic_grad;
-    
-%     dk = (1 - rho)*dk + rho*gradf(xk);
-    %     Axk = A*xk;
-    %     vk = beta*dk + A'*(Axk - proxg(Axk,beta));
-    vk = beta*dk + (xk - proxg(xk,beta)); % A = Identity;
-    sXk = lmoX(vk);
+    dk = (1 - rho)*dk + rho*gradf(xk);
+    sXk = lmoX(dk);
     xk = xk + eta*(sXk - xk);
     
     % Stop itration timer
@@ -93,15 +75,6 @@ for itr = 1:maxitr
             fprintf(['  \t',errFncs{sIr},' = %4.2e'],info.(errFncs{sIr})(itr,1));
         end
         fprintf('\n');
-    end
-    
-    % check time and stop if the walltime is reached
-    if clkTime >= stoptime
-        info.time(itr+1:end) = [];
-        for sIr = 1:2:length(errFncs)
-            info.(errFncs{sIr})(itr+1:end) = [];
-        end
-        break;
     end
     
 end

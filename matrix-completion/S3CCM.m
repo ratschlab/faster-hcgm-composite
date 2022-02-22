@@ -1,7 +1,10 @@
-function [ xk, info ] = SHCGM( gradf, lmoX, proxg, beta0, xk, varargin)
-%SHCGM This function implements our Stochastic Homotopy Conditional
-%Gradient Method from [Ref] for the matrix completion and covariance
-%matrix estimation problems.
+function [ x_g, info ] = S3CCM( sto_grad, prox_f, prox_g, gamma, x_f_0 , varargin)
+%S3CCM This function implements Stochastic Three Composite Convex 
+%Minimization method from [Ref2] for the matrix completion problem.
+%
+% [Ref2] Yurtsever, A., Vu, B.C., Cevher, V.
+% "Stochastic Three-Composite Convex Minimization"
+% Advances in Neural Information Processing Systems 29 (NeurIPS 2016).
 %
 % [Ref] Locatello, F., Yurtsever, A., Fercoq, O., Cevher, V.
 % "Stochastic Conditional Gradient Method for Composite Convex Minimization"
@@ -13,7 +16,7 @@ function [ xk, info ] = SHCGM( gradf, lmoX, proxg, beta0, xk, varargin)
 
 % Default choices
 errFncs = {};
-maxitr = 1000;
+maxitr = 10000;   % total iterations
 printfrequency = 0;
 stoptime = inf;
 
@@ -38,12 +41,17 @@ end
 
 %% Preallocate data vectors
 info.time = nan(maxitr,1);
+info.gamma = gamma;
 for sIr = 1:2:length(errFncs)
     info.(errFncs{sIr}) = nan(maxitr,1);
 end
 
+%% Initilization
+x_f = x_f_0;
+x_g = prox_g(x_f_0, gamma);
+u_g = (1/gamma)*(x_f - x_g);%*0;
+
 %% Algorithm
-dk = sparse(0);
 clkTime = 0;
 for itr = 1:maxitr
     
@@ -51,31 +59,10 @@ for itr = 1:maxitr
     clkTimer = tic;
     
     % Main algorithm
-    eta = 9/(itr+8);
-    beta = beta0/sqrt(itr+8);
-    rho = 4/(itr+7)^(2/3);
-    
-    stochastic_grad = gradf(xk);
-    
-    % initialize dk since we don't know the size of the gradients in
-    % advance.
-    if all(size(dk) == [1,1])
-        dk = sparse(size(stochastic_grad,1),size(stochastic_grad,2));
-    end
-    
-    % to overwrite the values, first set them to zero and then add in the
-    % gradients which are padded with zeros wherever there is no
-    % observation anyway.
-    [r,c,v] = find(stochastic_grad);    
-    dk([r,c]) = 0;
-    dk = dk + stochastic_grad;
-    
-%     dk = (1 - rho)*dk + rho*gradf(xk);
-    %     Axk = A*xk;
-    %     vk = beta*dk + A'*(Axk - proxg(Axk,beta));
-    vk = beta*dk + (xk - proxg(xk,beta)); % A = Identity;
-    sXk = lmoX(vk);
-    xk = xk + eta*(sXk - xk);
+    x_g = prox_g(x_f + gamma*u_g, gamma);
+    u_g = (1/gamma)*(x_f - x_g) + u_g;
+    r_next = sto_grad(x_g);
+    x_f = prox_f(x_g - gamma* (u_g + r_next), gamma);
     
     % Stop itration timer
     clkTime = clkTime + toc(clkTimer);
@@ -83,13 +70,13 @@ for itr = 1:maxitr
     % save progress
     info.time(itr,1) = clkTime;
     for sIr = 1:2:length(errFncs)
-        info.(errFncs{sIr})(itr,1) = errFncs{sIr+1}(xk);
+        info.(errFncs{sIr})(itr,1) = errFncs{sIr+1}(x_g);
     end
     
     % print progress
     if printfrequency && (mod(itr,printfrequency)==0)
         fprintf('itr = %d%4.2e', itr);
-        for sIr = 1:2:min(length(errFncs),16)
+        for sIr = 1:2:min(length(errFncs),6)
             fprintf(['  \t',errFncs{sIr},' = %4.2e'],info.(errFncs{sIr})(itr,1));
         end
         fprintf('\n');
@@ -104,8 +91,6 @@ for itr = 1:maxitr
         break;
     end
     
-end
-
 end
 
 %% Last edit: 24 October 2019 - Alp Yurtsever

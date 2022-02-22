@@ -55,22 +55,7 @@ for itr = 1:maxitr
     beta = beta0/sqrt(itr+8);
     rho = 4/(itr+7)^(2/3);
     
-    stochastic_grad = gradf(xk);
-    
-    % initialize dk since we don't know the size of the gradients in
-    % advance.
-    if all(size(dk) == [1,1])
-        dk = sparse(size(stochastic_grad,1),size(stochastic_grad,2));
-    end
-    
-    % to overwrite the values, first set them to zero and then add in the
-    % gradients which are padded with zeros wherever there is no
-    % observation anyway.
-    [r,c,v] = find(stochastic_grad);    
-    dk([r,c]) = 0;
-    dk = dk + stochastic_grad;
-    
-%     dk = (1 - rho)*dk + rho*gradf(xk);
+    dk = (1 - rho)*dk + rho*gradf(xk);
     %     Axk = A*xk;
     %     vk = beta*dk + A'*(Axk - proxg(Axk,beta));
     vk = beta*dk + (xk - proxg(xk,beta)); % A = Identity;
