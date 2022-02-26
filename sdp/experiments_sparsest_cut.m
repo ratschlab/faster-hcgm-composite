@@ -1,4 +1,16 @@
-    clear variables; 
+%% Description
+% This script implements the sparseset cut experiment.
+%
+% Based on code provided in [1]
+%
+% [1] Vladarean, Maria-Luiza, Ahmet Alacaoglu, Ya-Ping Hsieh, and Volkan Cevher.
+% "Conditional gradient methods for stochastically constrained convex
+% minimization." In International Conference on Machine Learning, PMLR, 2020.
+% https://proceedings.mlr.press/v119/vladarean20a.html
+%
+% contact: Gideon Dresdner - dgideon@inf.ethz.ch
+
+clear variables; 
 clear global;
 clear functions;
 close all;
