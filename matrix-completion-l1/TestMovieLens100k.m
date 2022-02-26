@@ -1,18 +1,17 @@
 %% Description
 % This script implements the matrix completion experiment with L1
-% regularization. We use MovieLens 100k dataset, make sure that you 
-% % download the dataset by running DOWNLOADDATA before this test. 
-% This script will save the results under the results folder. 
-% Run PLOTFIG4 to generate the plots. 
-% 
-% [Ref] Dresdner, G. ,.......... WRITE ME .......
+% regularization. We use MovieLens 100k dataset, make sure that you download
+% the dataset by running DOWNLOADDATA before this test. This script will save
+% the results under the results folder. Run PlotFig to generate the plots.
 %
-% [LY+19] Locatello, F., Yurtsever, A., Fercoq, O., Cevher, V.
-% "Stochastic Conditional Gradient Method for Composite Convex Minimization"
-% Advances in Neural Information Processing Systems 32 (NeurIPS 2019).
+% Modified from the code for [LY+19]
 %
-% Modified from the code for [LY+19] 
-% contact: Gideon Dresdner
+% [1] Locatello, F., Yurtsever, A., Fercoq, O., Cevher, V. "Stochastic Conditional
+% Gradient Method for Composite Convex Minimization" Advances in Neural
+% Information Processing Systems 32 (NeurIPS 2019).
+% https://hal.archives-ouvertes.fr/hal-02007612/
+%
+% contact: Gideon Dresdner - dgideon@inf.ethz.ch
 
 %% Fix the seed for reproducability
 rng(0,'twister');

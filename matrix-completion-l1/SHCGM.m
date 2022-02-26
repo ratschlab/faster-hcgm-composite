@@ -1,4 +1,14 @@
 function [ xk, info ] = SHCGM( gradf, lmoX, proxg, beta0, xk, varargin)
+% SHCGM This function implements our Stochastic Homotopy Conditional
+% Gradient Method from [Ref] for the matrix completion and covariance
+% matrix estimation problems.
+%
+% [Ref] Locatello, F., Yurtsever, A., Fercoq, O., Cevher, V.
+% "Stochastic Conditional Gradient Method for Composite Convex Minimization"
+% Advances in Neural Information Processing Systems 32 (NeurIPS 2019).
+%
+% contact: Alp Yurtsever - alp.yurtsever@epfl.ch
+
 %% Set parameters to user specified values
 
 % Default choices

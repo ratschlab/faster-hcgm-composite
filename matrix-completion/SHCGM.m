@@ -1,8 +1,13 @@
 function [ xk, info ] = SHCGM( gradf, lmoX, proxg, beta0, xk, varargin)
-% This implements our H-SAG-CGM method for the matrix completion task with
-% l1 regularization.
+% SHCGM This function implements our Stochastic Homotopy Conditional
+% Gradient Method from [Ref] for the matrix completion and covariance
+% matrix estimation problems.
 %
-% contact: Gideon Dresdner - dgideon@inf.ethz.ch
+% [Ref] Locatello, F., Yurtsever, A., Fercoq, O., Cevher, V.
+% "Stochastic Conditional Gradient Method for Composite Convex Minimization"
+% Advances in Neural Information Processing Systems 32 (NeurIPS 2019).
+%
+% contact: Alp Yurtsever - alp.yurtsever@epfl.ch
 
 %% Set parameters to user specified values
 
@@ -46,24 +51,11 @@ for itr = 1:maxitr
     clkTimer = tic;
     
     % Main algorithm
-    eta = 1/(itr+1);
-    beta = beta0/sqrt(itr+1);
+    eta = 9/(itr+8);
+    beta = beta0/sqrt(itr+8);
+    rho = 4/(itr+7)^(2/3);
     
-    stochastic_grad = gradf(xk);
-    
-    % initialize dk since we don't know the size of the gradients in
-    % advance.
-    if all(size(dk) == [1,1])
-        dk = sparse(size(stochastic_grad,1),size(stochastic_grad,2));
-    end
-    
-    % to overwrite the values, first set them to zero and then add in the
-    % gradients which are padded with zeros wherever there is no
-    % observation anyway.
-    [r,c,v] = find(stochastic_grad);    
-    dk([r,c]) = 0;
-    dk = dk + stochastic_grad;
-    
+    dk = (1 - rho)*dk + rho*gradf(xk);
     vk = beta*dk + (xk - proxg(xk,beta)); % A = Identity;
     sXk = lmoX(vk);
     xk = xk + eta*(sXk - xk);
@@ -98,3 +90,5 @@ for itr = 1:maxitr
 end
 
 end
+
+%% Last edit: 24 October 2019 - Alp Yurtsever

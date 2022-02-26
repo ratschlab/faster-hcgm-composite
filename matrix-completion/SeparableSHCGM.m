@@ -1,6 +1,6 @@
-function [ xk, info ] = SHCGM( gradf, lmoX, proxg, beta0, xk, varargin)
+function [ xk, info ] = SeparableSHCGM( gradf, lmoX, proxg, beta0, xk, varargin)
 % This implements our H-SAG-CGM method for the matrix completion task with
-% l1 regularization.
+% inequality constraints.
 %
 % contact: Gideon Dresdner - dgideon@inf.ethz.ch
 

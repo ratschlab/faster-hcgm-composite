@@ -1,4 +1,16 @@
 function [ objective, rmse_train, rmse_test, incrGradf, stochGradf, Gradf, proxg, lmoX, projX ] = Oracles_l1norm( numberSample,MovID,UserID,Rating,MovID_test,UserID_test,Rating_test,beta1,lambda )
+% This function returns the Oracles to be used in the Matrix Completion
+% experiment with l1 regularization.
+%
+% This implementation borrows heavily from the code implemeneted in [1].
+%
+%
+% [1] Locatello, F., Yurtsever, A., Fercoq, O., Cevher, V.
+% "Stochastic Conditional Gradient Method for Composite Convex Minimization"
+% Advances in Neural Information Processing Systems 32 (NeurIPS 2019).
+%
+% contact: Gideon Dresdner - dgideon@inf.ethz.ch
+
 %% RMSE
 nU = max(UserID);       % # Users
 nM = max(MovID);        % # Movies
