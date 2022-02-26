@@ -176,7 +176,7 @@ ylim([1,1e4]);
 xlim([1,1e4]);
 
 %% Legend
-hl = legend([hl1,hl3], 'SHCGM','H-SAG-CGM/v1', 'Interpreter', 'latex');
+hl = legend([hl1,hl3], 'SHCGM','H-SAG-CGM', 'Interpreter', 'latex');
 hl.Location = 'SouthWest';
 hl.FontSize = 13;
 hl.Interpreter = 'latex';
@@ -233,8 +233,6 @@ addpath('/Users/gideon/projects/SHCGM/lib/export_fig/');
 % Determine and create the path to save the figures
 figPath = ['figs/',datestr(now,30),'/'];
 mkdir(figPath);
-
-figPath = '/Users/gideon/polybox2/polybox/tex/overleaf/smooth_sdps/aistats2022/aistats2022-camera-ready/figs/MatrixCompletion-MovieLens100k-l.png'
 
 figHandles = findall(groot, 'Type', 'figure');
 for rr = 1:length(figHandles)

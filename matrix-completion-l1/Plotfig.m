@@ -64,7 +64,7 @@ ax.YLim = [0,6];
 %% Legend
 % hl = legend([hl3,hl2,hl1], 'Separable','SFW','SHCGM');
 %hl = legend([hl1,hl2,hl3], 'SHCGM','SFW','Separable (us)');
-hl = legend([hl1,hl3], 'SHCGM','H-SAG-CGM/v1', 'Interpreter', 'latex');
+hl = legend([hl1,hl3], 'SHCGM','H-SAG-CGM', 'Interpreter', 'latex');
 % hl.Location = 'SouthWest';
 hl.Location = 'NorthEast';
 hl.FontSize = 13;
