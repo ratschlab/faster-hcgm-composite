@@ -71,26 +71,21 @@ infoWithBox = {};
 infoWithoutBox = {};
 separableInfo = {};
 
-% for TestNo = 1:10
-for TestNo = 1:3
-    
-    fprintf('Test number %d \n', TestNo);    
-    
+num_iter = 1e4;
+
+for TestNo = 1:10
+
+    fprintf('Test number %d \n', TestNo);
+
     %% Run Separable SHCGM
     fprintf('Separable SHCGM-Test%d \n', TestNo);
     [ ~, separableInfo{end+1} ] = SeparableSHCGM( gradf, lmoX, proxg, beta0/10000, x0, ...
-        'maxitr', 1e4, 'errfncs', errFncs, 'printfrequency', 100 );
-    
+        'maxitr', num_iter, 'errfncs', errFncs, 'printfrequency', 100 );
+
     %% Run SHCGM
-%     fprintf('SHCGM-Test%d \n', TestNo);
-%     [ ~, infoWithBox{end+1} ] = SHCGM( gradf, lmoX, proxg, beta0, x0, ...
-%         'maxitr', 1e4, 'errfncs', errFncs, 'printfrequency', 100 );
-%     
-%     %% Run SHCGM
-%     fprintf('SFW1-Test%d \n', TestNo);
-%     [ ~, infoWithoutBox{end+1} ] = SFW1( gradf, lmoX, x0, ...
-%         'maxitr', 1e4, 'errfncs', errFncs, 'printfrequency', 100 );
-    
+     fprintf('SHCGM-Test%d \n', TestNo);
+     [ ~, infoWithBox{end+1} ] = SHCGM( gradf, lmoX, proxg, beta0, x0, ...
+         'maxitr', num_iter, 'errfncs', errFncs, 'printfrequency', 100 );
 end
 
 save("results/100k-separable-results.mat", 'separableInfo');
