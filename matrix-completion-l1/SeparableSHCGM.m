@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 function [ xk, info ] = SHCGM( gradf, lmoX, proxg, beta0, xk, varargin)
 %% Set parameters to user specified values
 
@@ -42,9 +41,8 @@ for itr = 1:maxitr
     clkTimer = tic;
     
     % Main algorithm
-    eta = 9/(itr+8);
-    beta = beta0/sqrt(itr+8);
-    rho = 4/(itr+7)^(2/3);
+    eta = 1/(itr+1);
+    beta = beta0/sqrt(itr+1);
     
     stochastic_grad = gradf(xk);
     
@@ -61,9 +59,6 @@ for itr = 1:maxitr
     dk([r,c]) = 0;
     dk = dk + stochastic_grad;
     
-%     dk = (1 - rho)*dk + rho*gradf(xk);
-    %     Axk = A*xk;
-    %     vk = beta*dk + A'*(Axk - proxg(Axk,beta));
     vk = beta*dk + (xk - proxg(xk,beta)); % A = Identity;
     sXk = lmoX(vk);
     xk = xk + eta*(sXk - xk);
